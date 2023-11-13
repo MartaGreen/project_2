@@ -34,37 +34,41 @@ void free_linked_list(DATALOGER_DATA** first_record) {
   free_linked_list(&next_link);
 }
 
-void create_record(FILE** dataloger, DATALOGER_DATA** first_record_link, DATALOGER_DATA** last_record_link, int records_count) {
+DATALOGER_DATA* create_record(int records_count, char id[6], char pozition[17], char type[3], double value, char time[5], char date[9]) {
   DATALOGER_DATA* new_record = (DATALOGER_DATA*)malloc(sizeof(DATALOGER_DATA));
-  char file_str[17];
 
-  fscanf(*dataloger, "%s", file_str);
   char id_start, id_end;
   int id_num;
-  sscanf(file_str, "%c%3d%c", &id_start, &id_num, &id_end);
+  sscanf(id, "%c%3d%c", &id_start, &id_num, &id_end);
   new_record->id.start = id_start;
   new_record->id.num_part = id_num;
   new_record->id.end = id_end;
 
-  fscanf(*dataloger, "%s", file_str);
   double latitude, longitude;
-  sscanf(file_str, "%8lf%8lf", &latitude, &longitude);
+  sscanf(pozition, "%8lf%8lf", &latitude, &longitude);
   new_record->pozition.latitude = latitude;
   new_record->pozition.longitude = longitude;
 
-  fscanf(*dataloger, "%s", file_str);
-  strcpy(new_record->type, file_str);
-
-  fscanf(*dataloger, "%s", file_str);
-  new_record->value = atof(file_str);
-
-  fscanf(*dataloger, "%s", file_str);
-  strcpy(new_record->time, file_str);
-
-  fscanf(*dataloger, "%s", file_str);
-  strcpy(new_record->date, file_str);
-
+  strcpy(new_record->type, type);
+  new_record->value = value;
+  strcpy(new_record->time, time);
+  strcpy(new_record->date, date);
   new_record->next = NULL;
+
+  return new_record;
+}
+
+void add_record(FILE** dataloger, DATALOGER_DATA** first_record_link, DATALOGER_DATA** last_record_link, int records_count) {
+  char id[6], pozition[17], type[3], time[5], date[9];
+  double value;
+  fscanf(*dataloger, "%s", id);
+  fscanf(*dataloger, "%s", pozition);
+  fscanf(*dataloger, "%s", type);
+  fscanf(*dataloger, "%lf", &value);
+  fscanf(*dataloger, "%s", time);
+  fscanf(*dataloger, "%s", date);
+
+  DATALOGER_DATA* new_record = create_record(records_count, id, pozition, type, value, time, date);
 
   if (records_count == 1) {
     *first_record_link = new_record;
@@ -93,7 +97,7 @@ int n(DATALOGER_DATA** first_record, int records_count) {
 
   while (fscanf(dataloger, "%s", file_str) == 1) {
     if (!strcmp(file_str, SEPARATOR)) records_count++;
-    create_record(&dataloger, &*first_record, &last_data_link, records_count);
+    add_record(&dataloger, &*first_record, &last_data_link, records_count);
   }
 
   fclose(dataloger);
@@ -115,6 +119,29 @@ void v(DATALOGER_DATA** first_record, int counter, int records_count) {
   v(&current_record->next, counter, records_count);
 }
 
+//B151a +481255+194514 RD 145.25 1015 20231010
+void p(DATALOGER_DATA** first_record, int records_count) {
+  int p;
+
+  scanf("%d", &p);
+
+  DATALOGER_DATA* prev_record = *first_record, * next_record;
+  for (int i = 0; i < p - 2; i++) {
+    prev_record = prev_record->next;
+  }
+  next_record = prev_record->next;
+
+  char id[6], pozition[17], type[3], time[5], date[9];
+  double value;
+  scanf("%s %s %s %lf %s %s", id, pozition, type, &value, time, date);
+  printf("%s %s %s %lf %s %s\n", id, pozition, type, value, time, date);
+
+  DATALOGER_DATA* new_record = create_record(records_count, id, pozition, type, value, time, date);
+
+  new_record->next = next_record;
+  prev_record->next = new_record;
+}
+
 int main() {
   char command;
   DATALOGER_DATA* first_record = NULL;
@@ -125,6 +152,7 @@ int main() {
 
     if (command == 'n') records_count = n(&first_record, records_count);
     if (command == 'v') v(&first_record, 1, records_count);
+    if (command == 'p') p(&first_record, records_count);
   }
   return 0;
 }
