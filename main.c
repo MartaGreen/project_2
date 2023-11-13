@@ -120,26 +120,36 @@ void v(DATALOGER_DATA** first_record, int counter, int records_count) {
 }
 
 //B151a +481255+194514 RD 145.25 1015 20231010
-void p(DATALOGER_DATA** first_record, int records_count) {
+int p(DATALOGER_DATA** first_record, int records_count) {
   int p;
 
   scanf("%d", &p);
 
-  DATALOGER_DATA* prev_record = *first_record, * next_record;
-  for (int i = 0; i < p - 2; i++) {
-    prev_record = prev_record->next;
-  }
-  next_record = prev_record->next;
+  if (p - records_count > 1) return records_count;
 
   char id[6], pozition[17], type[3], time[5], date[9];
   double value;
   scanf("%s %s %s %lf %s %s", id, pozition, type, &value, time, date);
-  printf("%s %s %s %lf %s %s\n", id, pozition, type, value, time, date);
 
   DATALOGER_DATA* new_record = create_record(records_count, id, pozition, type, value, time, date);
+  records_count++;
+
+  if (p == 1) {
+    new_record->next = (*first_record);
+    (*first_record) = new_record;
+    return records_count;
+  }
+
+  DATALOGER_DATA* prev_record = *first_record, * next_record;
+  for (int i = 1; i < p - 1; i++) {
+    prev_record = prev_record->next;
+  }
+  next_record = prev_record->next;
 
   new_record->next = next_record;
   prev_record->next = new_record;
+
+  return records_count;
 }
 
 void z(DATALOGER_DATA** first_record) {
