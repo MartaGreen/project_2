@@ -101,6 +101,18 @@ int n(DATALOGER_DATA** first_record, int records_count) {
   return records_count;
 }
 
+void v(DATALOGER_DATA** first_record, int counter) {
+  DATALOGER_DATA* current_record = *first_record;
+  printf("%d:\n", counter);
+  printf("ID: %c%d%c\t%s\t%g\n", current_record->id.start, current_record->id.num_part, current_record->id.end, current_record->type, current_record->value);
+  printf("Poz: %g\t%g\n", current_record->pozition.latitude, current_record->pozition.longitude);
+  printf("DaC: %s\t%s\n", current_record->date, current_record->time);
+
+  if ((*first_record)->next == NULL) return;
+  counter++;
+  v(&current_record->next, counter);
+}
+
 int main() {
   char command;
   DATALOGER_DATA* first_record = NULL;
@@ -110,6 +122,7 @@ int main() {
     scanf("%c", &command);
 
     if (command == 'n') records_count = n(&first_record, records_count);
+    if (command == 'v') v(&first_record, 1);
   }
   return 0;
 }
