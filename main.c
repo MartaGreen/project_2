@@ -25,6 +25,15 @@ typedef struct dataloger_data {
 
 char SEPARATOR[4] = "$$$\0";
 
+void free_linked_list(DATALOGER_DATA** first_record) {
+  // printf("deleted record id: %c%d%c\n", (*first_record)->id.start, (*first_record)->id.num_part, (*first_record)->id.end);
+  DATALOGER_DATA* next_link = (*first_record)->next;
+  if (next_link == NULL) return;
+
+  free(*first_record);
+  free_linked_list(&next_link);
+}
+
 void create_record(FILE** dataloger, DATALOGER_DATA** first_record_link, DATALOGER_DATA** last_record_link, int records_count) {
   DATALOGER_DATA* new_record = (DATALOGER_DATA*)malloc(sizeof(DATALOGER_DATA));
   char file_str[17];
@@ -67,42 +76,40 @@ void create_record(FILE** dataloger, DATALOGER_DATA** first_record_link, DATALOG
   *last_record_link = new_record;
 }
 
-int n() {
+int n(DATALOGER_DATA** first_record, int records_count) {
   FILE* dataloger = fopen("dataloger_V2.txt", "r");
   if (dataloger == NULL) {
     printf("Zaznamy neboli nacitane!\n");
-    return 1;
+    return 0;
+  }
+
+  if (records_count) {
+    free_linked_list(&*first_record);
+    records_count = 0;
   }
 
   char file_str[17];
-  int records_count = 0, counter = 0;
-  DATALOGER_DATA* first_data_link = NULL, * last_data_link = NULL;
+  DATALOGER_DATA* last_data_link = NULL;
 
   while (fscanf(dataloger, "%s", file_str) == 1) {
-    if (!strcmp(file_str, SEPARATOR)) {
-      records_count++;
-      counter = 0;
-    }
-
-    create_record(&dataloger, &first_data_link, &last_data_link, records_count);
-    printf("record %d was crwated\n", records_count);
+    if (!strcmp(file_str, SEPARATOR)) records_count++;
+    create_record(&dataloger, &*first_record, &last_data_link, records_count);
   }
 
   fclose(dataloger);
-  printf("records_count: %d\n", records_count);
-  printf("first record data: %c%d%c %g\n", first_data_link->id.start, first_data_link->id.num_part, first_data_link->id.end, first_data_link->value);
-  printf("next elem: %g %g\n", first_data_link->next->pozition.latitude, first_data_link->next->pozition.longitude);
-
-  return 0;
+  if (records_count) printf("Nacitalo sa %d zaznamov\n", records_count);
+  return records_count;
 }
 
 int main() {
   char command;
+  DATALOGER_DATA* first_record = NULL;
+  int records_count = 0;
 
   while (command != 'k') {
     scanf("%c", &command);
 
-    if (command == 'n') n();
+    if (command == 'n') records_count = n(&first_record, records_count);
   }
   return 0;
 }
