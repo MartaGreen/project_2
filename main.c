@@ -27,7 +27,6 @@ char SEPARATOR[4] = "$$$\0";
 
 void create_record(FILE** dataloger, DATALOGER_DATA** first_record_link, DATALOGER_DATA** last_record_link, int records_count) {
   DATALOGER_DATA* new_record = (DATALOGER_DATA*)malloc(sizeof(DATALOGER_DATA));
-  if (records_count == 1) *first_record_link = new_record;
   char file_str[17];
 
   fscanf(*dataloger, "%s", file_str);
@@ -40,13 +39,11 @@ void create_record(FILE** dataloger, DATALOGER_DATA** first_record_link, DATALOG
 
   fscanf(*dataloger, "%s", file_str);
   double latitude, longitude;
-  sscanf(file_str, "%7lf%7lf", &latitude, &longitude);
+  sscanf(file_str, "%8lf%8lf", &latitude, &longitude);
   new_record->pozition.latitude = latitude;
   new_record->pozition.longitude = longitude;
 
-  printf("3\n");
   fscanf(*dataloger, "%s", file_str);
-  printf("%s\n", file_str);
   strcpy(new_record->type, file_str);
 
   fscanf(*dataloger, "%s", file_str);
@@ -58,7 +55,15 @@ void create_record(FILE** dataloger, DATALOGER_DATA** first_record_link, DATALOG
   fscanf(*dataloger, "%s", file_str);
   strcpy(new_record->date, file_str);
 
-  new_record->next = *last_record_link;
+  new_record->next = NULL;
+
+  if (records_count == 1) {
+    *first_record_link = new_record;
+    *last_record_link = new_record;
+    return;
+  }
+
+  (*last_record_link)->next = new_record;
   *last_record_link = new_record;
 }
 
@@ -85,7 +90,8 @@ int n() {
 
   fclose(dataloger);
   printf("records_count: %d\n", records_count);
-  // printf("first record data: %c%d%c %g\n", first_data_link->id.start, first_data_link->id.num_part, first_data_link->id.end, first_data_link->value);
+  printf("first record data: %c%d%c %g\n", first_data_link->id.start, first_data_link->id.num_part, first_data_link->id.end, first_data_link->value);
+  printf("next elem: %g %g\n", first_data_link->next->pozition.latitude, first_data_link->next->pozition.longitude);
 
   return 0;
 }
