@@ -101,7 +101,9 @@ int n(DATALOGER_DATA** first_record, int records_count) {
   return records_count;
 }
 
-void v(DATALOGER_DATA** first_record, int counter) {
+void v(DATALOGER_DATA** first_record, int counter, int records_count) {
+  if (!records_count) return;
+
   DATALOGER_DATA* current_record = *first_record;
   printf("%d:\n", counter);
   printf("ID: %c%d%c\t%s\t%g\n", current_record->id.start, current_record->id.num_part, current_record->id.end, current_record->type, current_record->value);
@@ -110,7 +112,7 @@ void v(DATALOGER_DATA** first_record, int counter) {
 
   if ((*first_record)->next == NULL) return;
   counter++;
-  v(&current_record->next, counter);
+  v(&current_record->next, counter, records_count);
 }
 
 int main() {
@@ -122,7 +124,7 @@ int main() {
     scanf("%c", &command);
 
     if (command == 'n') records_count = n(&first_record, records_count);
-    if (command == 'v') v(&first_record, 1);
+    if (command == 'v') v(&first_record, 1, records_count);
   }
   return 0;
 }
