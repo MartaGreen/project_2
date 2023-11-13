@@ -142,6 +142,33 @@ void p(DATALOGER_DATA** first_record, int records_count) {
   prev_record->next = new_record;
 }
 
+void z(DATALOGER_DATA** first_record) {
+  char removed_id[6];
+  scanf("%s", removed_id);
+
+  DATALOGER_DATA* current_record = *first_record, * prev_record = NULL;
+  while (current_record->next != NULL) {
+    char id[6];
+    sprintf(id, "%c%d%c", current_record->id.start, current_record->id.num_part, current_record->id.end);
+
+    if (prev_record == NULL && !strcmp(id, removed_id)) {
+      current_record = current_record->next;
+      (*first_record) = current_record;
+      continue;
+    }
+
+    if (!strcmp(id, removed_id)) {
+      prev_record->next = current_record->next;
+      free(current_record);
+      current_record = prev_record->next;
+      continue;
+    }
+
+    prev_record = current_record;
+    current_record = current_record->next;
+  }
+}
+
 int main() {
   char command;
   DATALOGER_DATA* first_record = NULL;
@@ -153,6 +180,7 @@ int main() {
     if (command == 'n') records_count = n(&first_record, records_count);
     if (command == 'v') v(&first_record, 1, records_count);
     if (command == 'p') p(&first_record, records_count);
+    if (command == 'z') z(&first_record);
   }
   return 0;
 }
