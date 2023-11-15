@@ -179,6 +179,68 @@ void z(DATALOGER_DATA** first_record) {
   }
 }
 
+//return 1 if date1 > date2
+//return 0 if date1 <= date2
+int compare_dates(char date1[9], char time[5], char date2[9], char time2[5]) {
+  int year1, month1, day1;
+  int hour1, minutes1;
+
+  sscanf(date1, "%4d%2d%2d", &year1, &month1, &day1);
+  sscanf(time, "%2d%2d", &hour1, &minutes1);
+
+  int year2, month2, day2;
+  int hour2, minutes2;
+
+  sscanf(date2, "%4d%2d%2d", &year2, &month2, &day2);
+  sscanf(time2, "%2d%2d", &hour2, &minutes2);
+
+  if (year1 > year2) return 1;
+  else if (month1 > month2) return 1;
+  else if (day1 > day2) return 1;
+  else if (hour1 > hour2) return 1;
+  else if (minutes1 > minutes2) return 1;
+
+  return 0;
+}
+
+void u(DATALOGER_DATA** first_record) {
+  DATALOGER_DATA* current_record_i = *first_record, * current_record_j = NULL,
+    * prev_record_i = NULL, * prev_record_j = NULL, * save_next = NULL;
+
+  while (current_record_i->next != NULL) {
+    current_record_j = current_record_i->next;
+
+    while (current_record_j->next != NULL) {
+      prev_record_j = current_record_j;
+      current_record_j = current_record_j->next;
+
+      char date1[9], time1[5], date2[9], time2[5];
+      strcpy(date1, current_record_i->date);
+      strcpy(time1, current_record_i->time);
+      strcpy(date2, current_record_j->date);
+      strcpy(time2, current_record_j->time);
+
+      if (compare_dates(date1, time1, date2, time2)) {
+        save_next = current_record_j->next;
+        if (prev_record_i != NULL) {
+          prev_record_i->next = current_record_j;
+        }
+        current_record_j->next = current_record_i->next;
+        current_record_i->next->next = prev_record_j;
+        prev_record_j->next = current_record_i;
+        current_record_i->next = save_next;
+
+        DATALOGER_DATA* changer = current_record_i;
+        current_record_i = current_record_j;
+        current_record_j = changer;
+      }
+    }
+
+    prev_record_i = current_record_i;
+    current_record_i = current_record_i->next;
+  }
+}
+
 int main() {
   char command;
   DATALOGER_DATA* first_record = NULL;
@@ -191,6 +253,7 @@ int main() {
     if (command == 'v') v(&first_record, 1, records_count);
     if (command == 'p') p(&first_record, records_count);
     if (command == 'z') z(&first_record);
+    if (command == 'u') u(&first_record);
   }
   return 0;
 }
