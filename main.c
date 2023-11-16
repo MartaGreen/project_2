@@ -203,6 +203,70 @@ int compare_dates(char date1[9], char time[5], char date2[9], char time2[5]) {
   return 0;
 }
 
+void replace_records(DATALOGER_DATA** first_record, int pos1, int pos2) {
+  if (pos1 == pos2) return;
+
+  DATALOGER_DATA* record_1_prev = NULL, * record_2_prev = NULL,
+    * current_record = *first_record;
+  int counter1 = 1, counter2 = 1;
+  int found_first_record = 0, found_second_record = 0;
+
+  if (pos1 > pos2) {
+    int pos_changer = pos1;
+    pos1 = pos2;
+    pos2 = pos_changer;
+  }
+
+  while (current_record->next != NULL && pos1 != 1 && pos2 != 1 && (!found_first_record || !found_second_record)) {
+    if (!found_first_record && pos1 == 1) found_first_record = 1;
+    if (!found_first_record && (counter1 == pos1 - 1)) {
+      record_1_prev = current_record;
+      found_first_record = 1;
+    }
+    if (!found_second_record && pos2 == 1) found_second_record = 1;
+    if (!found_second_record && (counter2 == pos2 - 1)) {
+      record_2_prev = current_record;
+      found_second_record = 1;
+    }
+
+    if (found_first_record && found_second_record) break;
+
+    counter1 += !found_first_record ? 1 : 0;
+    counter2 += !found_second_record ? 1 : 0;
+    current_record = current_record->next;
+  }
+
+  DATALOGER_DATA* record_1 = record_1_prev->next,
+    * record_2 = record_2_prev->next,
+    * record_2_next = record_2->next;
+
+
+  if (record_1_prev != NULL) {
+    record_1_prev->next = record_2;
+    *first_record = record_1;
+  }
+  record_2->next = record_1->next;
+  record_1->next->next = record_2_prev;
+  record_2_prev->next = record_1;
+  record_1->next = record_2_next;
+  // *first_record = record_1_prev;
+
+  // DATALOGER_DATA* record_i = *first_record;
+  // while (record_i->next != NULL) {
+  //   printf("%c%d%c %g\n", record_i->id.start, record_i->id.num_part, record_i->id.end, record_i->value);
+  //   record_i = record_i->next;
+  // }
+}
+
+void r(DATALOGER_DATA** first_record, int records_count) {
+  int pos1, pos2;
+  scanf("%d %d", &pos1, &pos2);
+
+  if (pos1 > records_count || pos2 > records_count) return;
+
+  replace_records(&*first_record, pos1, pos2);
+}
+
 void u(DATALOGER_DATA** first_record) {
   DATALOGER_DATA* current_record_i = *first_record, * current_record_j = NULL,
     * prev_record_i = NULL, * prev_record_j = NULL, * save_next = NULL;
@@ -254,6 +318,7 @@ int main() {
     if (command == 'p') p(&first_record, records_count);
     if (command == 'z') z(&first_record);
     if (command == 'u') u(&first_record);
+    if (command == 'r') r(&first_record, records_count);
   }
   return 0;
 }
