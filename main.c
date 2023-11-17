@@ -119,7 +119,6 @@ void v(DATALOGER_DATA** first_record, int counter, int records_count) {
   v(&current_record->next, counter, records_count);
 }
 
-//B151a +481255+194514 RD 145.25 1015 20231010
 int p(DATALOGER_DATA** first_record, int records_count) {
   int p;
 
@@ -203,7 +202,33 @@ int compare_dates(char date1[9], char time[5], char date2[9], char time2[5]) {
   return 0;
 }
 
-void replace_records(DATALOGER_DATA** first_record, int pos1, int pos2) {
+void replace_records(DATALOGER_DATA** first_record, DATALOGER_DATA** record_1_prev, DATALOGER_DATA** record_2_prev) {
+  DATALOGER_DATA* record_1 = *record_1_prev == NULL ? *first_record : (*record_1_prev)->next,
+    * record_2 = (*record_2_prev)->next,
+    * record_2_next = record_2->next;
+
+  if (*record_1_prev != NULL) {
+    (*record_1_prev)->next = record_2;
+  }
+  else {
+    *first_record = record_2;
+  }
+  if (record_1->next != record_2) {
+    record_2->next = record_1->next;
+    (*record_2_prev)->next = record_1;
+  }
+  else {
+    record_2->next = record_1;
+  }
+  record_1->next = record_2_next;
+}
+
+void r(DATALOGER_DATA** first_record, int records_count) {
+  int pos1, pos2;
+  scanf("%d %d", &pos1, &pos2);
+
+  if (pos1 > records_count || pos2 > records_count) return;
+
   if (pos1 == pos2) return;
 
   DATALOGER_DATA* record_1_prev = NULL, * record_2_prev = NULL,
@@ -234,33 +259,7 @@ void replace_records(DATALOGER_DATA** first_record, int pos1, int pos2) {
     current_record = current_record->next;
   }
 
-  DATALOGER_DATA* record_1 = record_1_prev == NULL ? *first_record : record_1_prev->next,
-    * record_2 = record_2_prev->next,
-    * record_2_next = record_2->next;
-
-  if (record_1_prev != NULL) {
-    record_1_prev->next = record_2;
-  }
-  else {
-    *first_record = record_2;
-  }
-  if (pos2 - pos1 != 1) {
-    record_2->next = record_1->next;
-    record_2_prev->next = record_1;
-  }
-  else {
-    record_2->next = record_1;
-  }
-  record_1->next = record_2_next;
-}
-
-void r(DATALOGER_DATA** first_record, int records_count) {
-  int pos1, pos2;
-  scanf("%d %d", &pos1, &pos2);
-
-  if (pos1 > records_count || pos2 > records_count) return;
-
-  replace_records(&*first_record, pos1, pos2);
+  replace_records(&*first_record, &record_1_prev, &record_2_prev);
 }
 
 void u(DATALOGER_DATA** first_record) {
