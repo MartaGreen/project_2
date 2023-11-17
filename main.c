@@ -236,26 +236,27 @@ void replace_records(DATALOGER_DATA** first_record, int pos1, int pos2) {
     current_record = current_record->next;
   }
 
-  DATALOGER_DATA* record_1 = record_1_prev->next,
+  DATALOGER_DATA* record_1 = record_1_prev == NULL ? *first_record : record_1_prev->next,
     * record_2 = record_2_prev->next,
     * record_2_next = record_2->next;
 
 
   if (record_1_prev != NULL) {
     record_1_prev->next = record_2;
+  }
+  else {
     *first_record = record_1;
   }
   record_2->next = record_1->next;
-  record_1->next->next = record_2_prev;
+  // record_1->next->next = record_2_prev;
   record_2_prev->next = record_1;
   record_1->next = record_2_next;
-  // *first_record = record_1_prev;
 
-  // DATALOGER_DATA* record_i = *first_record;
-  // while (record_i->next != NULL) {
-  //   printf("%c%d%c %g\n", record_i->id.start, record_i->id.num_part, record_i->id.end, record_i->value);
-  //   record_i = record_i->next;
-  // }
+  DATALOGER_DATA* record_i = *first_record;
+  while (record_i->next != NULL) {
+    printf("%c%d%c %g\n", record_i->id.start, record_i->id.num_part, record_i->id.end, record_i->value);
+    record_i = record_i->next;
+  }
 }
 
 void r(DATALOGER_DATA** first_record, int records_count) {
