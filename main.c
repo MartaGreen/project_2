@@ -217,7 +217,7 @@ void replace_records(DATALOGER_DATA** first_record, int pos1, int pos2) {
     pos2 = pos_changer;
   }
 
-  while (current_record->next != NULL && pos1 != 1 && pos2 != 1 && (!found_first_record || !found_second_record)) {
+  while (current_record->next != NULL && (!found_first_record || !found_second_record)) {
     if (!found_first_record && pos1 == 1) found_first_record = 1;
     if (!found_first_record && (counter1 == pos1 - 1)) {
       record_1_prev = current_record;
@@ -229,8 +229,6 @@ void replace_records(DATALOGER_DATA** first_record, int pos1, int pos2) {
       found_second_record = 1;
     }
 
-    if (found_first_record && found_second_record) break;
-
     counter1 += !found_first_record ? 1 : 0;
     counter2 += !found_second_record ? 1 : 0;
     current_record = current_record->next;
@@ -239,16 +237,15 @@ void replace_records(DATALOGER_DATA** first_record, int pos1, int pos2) {
   DATALOGER_DATA* record_1 = record_1_prev == NULL ? *first_record : record_1_prev->next,
     * record_2 = record_2_prev->next,
     * record_2_next = record_2->next;
-
+  printf("%g\n", record_1->value);
 
   if (record_1_prev != NULL) {
     record_1_prev->next = record_2;
   }
   else {
-    *first_record = record_1;
+    *first_record = record_2;
   }
   record_2->next = record_1->next;
-  // record_1->next->next = record_2_prev;
   record_2_prev->next = record_1;
   record_1->next = record_2_next;
 
