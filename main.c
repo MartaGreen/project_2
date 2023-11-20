@@ -194,10 +194,14 @@ int compare_dates(char date1[9], char time[5], char date2[9], char time2[5]) {
   sscanf(time2, "%2d%2d", &hour2, &minutes2);
 
   if (year1 > year2) return 1;
-  else if (month1 > month2) return 1;
-  else if (day1 > day2) return 1;
-  else if (hour1 > hour2) return 1;
-  else if (minutes1 > minutes2) return 1;
+  if (year1 < year2) return 0;
+  if (month1 > month2) return 1;
+  if (month1 < month2) return 0;
+  if (day1 > day2) return 1;
+  if (day1 < day2) return 0;
+  if (hour1 > hour2) return 1;
+  if (hour1 < hour2) return 0;
+  if (minutes1 > minutes2) return 1;
 
   return 0;
 }
@@ -264,7 +268,7 @@ void r(DATALOGER_DATA** first_record, int records_count) {
 
 void u(DATALOGER_DATA** first_record) {
   DATALOGER_DATA* current_record_i = *first_record, * current_record_j = NULL,
-    * prev_record_i = NULL, * prev_record_j = NULL, * save_next = NULL;
+    * prev_record_i = NULL, * prev_record_j = NULL;
 
   while (current_record_i->next != NULL) {
     current_record_j = current_record_i->next;
@@ -280,18 +284,11 @@ void u(DATALOGER_DATA** first_record) {
       strcpy(time2, current_record_j->time);
 
       if (compare_dates(date1, time1, date2, time2)) {
-        save_next = current_record_j->next;
-        if (prev_record_i != NULL) {
-          prev_record_i->next = current_record_j;
-        }
-        current_record_j->next = current_record_i->next;
-        current_record_i->next->next = prev_record_j;
-        prev_record_j->next = current_record_i;
-        current_record_i->next = save_next;
+        replace_records(&*first_record, &prev_record_i, &prev_record_j);
 
-        DATALOGER_DATA* changer = current_record_i;
-        current_record_i = current_record_j;
-        current_record_j = changer;
+        if (prev_record_i == NULL) current_record_i = *first_record;
+        else current_record_i = prev_record_i->next;
+        current_record_j = prev_record_j->next;
       }
     }
 
