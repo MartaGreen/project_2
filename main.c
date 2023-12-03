@@ -26,7 +26,6 @@ typedef struct dataloger_data {
 char SEPARATOR[4] = "$$$\0";
 
 void free_linked_list(DATALOGER_DATA** first_record) {
-  // printf("deleted record id: %c%d%c\n", (*first_record)->id.start, (*first_record)->id.num_part, (*first_record)->id.end);
   DATALOGER_DATA* next_link = (*first_record)->next;
   if (next_link == NULL) return;
 
@@ -131,8 +130,8 @@ int p(DATALOGER_DATA** first_record, int records_count) {
   scanf("%d", &p);
 
   if (p < 0) return records_count;
+  records_count++;
   if (p > records_count) {
-    records_count++;
     p = records_count;
   }
 
@@ -141,7 +140,6 @@ int p(DATALOGER_DATA** first_record, int records_count) {
   scanf("%s %s %s %lf %s %s", id, pozition, type, &value, time, date);
 
   DATALOGER_DATA* new_record = create_record(records_count, id, pozition, type, value, time, date);
-  records_count++;
 
   if (p == 1) {
     new_record->next = (*first_record);
@@ -200,7 +198,6 @@ int z(DATALOGER_DATA** first_record, int records_count) {
   }
 
   sprintf(id, "%c%d%c", current_record->id.start, current_record->id.num_part, current_record->id.end);
-  printf("%s\n", id);
   if (!strcmp(id, removed_id)) {
     prev_record->next = NULL;
     free(current_record);
@@ -361,13 +358,12 @@ int main() {
 
     if (command == 'n') records_count = n(&first_record, records_count);
     if (command == 'v') v(&first_record, 1, records_count);
-    if (command == 'p') p(&first_record, records_count);
+    if (command == 'p') records_count = p(&first_record, records_count);
     if (command == 'z') records_count = z(&first_record, records_count);
     if (command == 'u') u(&first_record, records_count);
     if (command == 'r') r(&first_record, records_count);
   }
 
   if (first_record != NULL) free_linked_list(&first_record);
-  printf("%lf", first_record->value);
   return 0;
 }
