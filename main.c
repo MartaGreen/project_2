@@ -111,7 +111,7 @@ void v(DATALOGER_DATA** first_record, int counter, int records_count) {
   DATALOGER_DATA* current_record = *first_record;
   printf("%d:\n", counter);
   printf("ID: %c%d%c\t%s\t%g\n", current_record->id.start, current_record->id.num_part, current_record->id.end, current_record->type, current_record->value);
-  printf("Poz: %g\t%g\n", current_record->pozition.latitude, current_record->pozition.longitude);
+  printf("Poz: %+g\t%+g\n", current_record->pozition.latitude, current_record->pozition.longitude);
   printf("DaC: %s\t%s\n", current_record->date, current_record->time);
 
   if ((*first_record)->next == NULL) return;
@@ -119,12 +119,22 @@ void v(DATALOGER_DATA** first_record, int counter, int records_count) {
   v(&current_record->next, counter, records_count);
 }
 
+// B151a +48.1255+19.4514 RD 145.25 1015 20231010
 int p(DATALOGER_DATA** first_record, int records_count) {
+  if (*first_record == NULL) {
+    printf("Zaznamy neboli nacitane!\n");
+    return 0;
+  }
+
   int p;
 
   scanf("%d", &p);
 
-  if (p - records_count > 1) return records_count;
+  if (p < 0) return records_count;
+  if (p > records_count) {
+    records_count++;
+    p = records_count;
+  }
 
   char id[6], pozition[17], type[3], time[5], date[9];
   double value;
@@ -151,18 +161,28 @@ int p(DATALOGER_DATA** first_record, int records_count) {
   return records_count;
 }
 
-void z(DATALOGER_DATA** first_record) {
+int z(DATALOGER_DATA** first_record, int records_count) {
+  if (*first_record == NULL) {
+    printf("Zaznamy neboli nacitane!\n");
+    return records_count;
+  }
+
   char removed_id[6];
   scanf("%s", removed_id);
 
+  int removed_counter = 0;
+
   DATALOGER_DATA* current_record = *first_record, * prev_record = NULL;
+  char id[6];
   while (current_record->next != NULL) {
-    char id[6];
     sprintf(id, "%c%d%c", current_record->id.start, current_record->id.num_part, current_record->id.end);
 
     if (prev_record == NULL && !strcmp(id, removed_id)) {
-      current_record = current_record->next;
-      (*first_record) = current_record;
+      (*first_record) = current_record->next;
+      free(current_record);
+      current_record = *first_record;
+      printf("Zaznam pre ID: %s bol vymazany.\n", removed_id);
+      removed_counter++;
       continue;
     }
 
@@ -170,12 +190,25 @@ void z(DATALOGER_DATA** first_record) {
       prev_record->next = current_record->next;
       free(current_record);
       current_record = prev_record->next;
+      printf("Zaznam pre ID: %s bol vymazany.\n", removed_id);
+      removed_counter++;
       continue;
     }
 
     prev_record = current_record;
     current_record = current_record->next;
   }
+
+  sprintf(id, "%c%d%c", current_record->id.start, current_record->id.num_part, current_record->id.end);
+  printf("%s\n", id);
+  if (!strcmp(id, removed_id)) {
+    prev_record->next = NULL;
+    free(current_record);
+    printf("Zaznam pre ID: %s bol vymazany.\n", removed_id);
+    removed_counter++;
+  }
+
+  return records_count - removed_counter;
 }
 
 //return 1 if date1 > date2
@@ -228,6 +261,11 @@ void replace_records(DATALOGER_DATA** first_record, DATALOGER_DATA** record_1_pr
 }
 
 void r(DATALOGER_DATA** first_record, int records_count) {
+  if (*first_record == NULL) {
+    printf("Zaznamy neboli nacitane!\n");
+    return;
+  }
+
   int pos1, pos2;
   scanf("%d %d", &pos1, &pos2);
 
@@ -266,7 +304,12 @@ void r(DATALOGER_DATA** first_record, int records_count) {
   replace_records(&*first_record, &record_1_prev, &record_2_prev);
 }
 
-void u(DATALOGER_DATA** first_record) {
+void u(DATALOGER_DATA** first_record, int records_count) {
+  if (*first_record == NULL) {
+    printf("Zaznamy neboli nacitane!\n");
+    return;
+  }
+
   DATALOGER_DATA* current_record_i = *first_record, * current_record_j = NULL,
     * prev_record_i = NULL, * prev_record_j = NULL;
 
@@ -295,6 +338,17 @@ void u(DATALOGER_DATA** first_record) {
     prev_record_i = current_record_i;
     current_record_i = current_record_i->next;
   }
+
+  DATALOGER_DATA* records_iterator = *first_record;
+  int counter = 0;
+  while (records_iterator->next != NULL) {
+    counter++;
+    records_iterator = records_iterator->next;
+  }
+  counter++;
+
+  if (counter == records_count) printf("Spajany zoznam bol usporiadany.\n");
+  else printf("Chyba usporiadania\n");
 }
 
 int main() {
@@ -308,9 +362,12 @@ int main() {
     if (command == 'n') records_count = n(&first_record, records_count);
     if (command == 'v') v(&first_record, 1, records_count);
     if (command == 'p') p(&first_record, records_count);
-    if (command == 'z') z(&first_record);
-    if (command == 'u') u(&first_record);
+    if (command == 'z') records_count = z(&first_record, records_count);
+    if (command == 'u') u(&first_record, records_count);
     if (command == 'r') r(&first_record, records_count);
   }
+
+  if (first_record != NULL) free_linked_list(&first_record);
+  printf("%lf", first_record->value);
   return 0;
 }
