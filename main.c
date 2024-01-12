@@ -120,11 +120,6 @@ void v(DATALOGER_DATA** first_record, int counter, int records_count) {
 
 // B151a +48.1255+19.4514 RD 145.25 1015 20231010
 int p(DATALOGER_DATA** first_record, int records_count) {
-  if (*first_record == NULL) {
-    printf("Zaznamy neboli nacitane!\n");
-    return 0;
-  }
-
   int p;
 
   scanf("%d", &p);
@@ -140,6 +135,10 @@ int p(DATALOGER_DATA** first_record, int records_count) {
   scanf("%s %s %s %lf %s %s", id, pozition, type, &value, time, date);
 
   DATALOGER_DATA* new_record = create_record(records_count, id, pozition, type, value, time, date);
+  if (*first_record == NULL) {
+    *first_record = new_record;
+    return 1;
+  }
 
   if (p == 1) {
     new_record->next = (*first_record);
